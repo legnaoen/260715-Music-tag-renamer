@@ -1,0 +1,95 @@
+# Music Tag Renamer Electron
+
+## 한국어
+
+DJ 라이브러리 정리를 위한 Windows Electron 앱입니다. MP3의 ID3 태그에서 제목(`TIT2`), BPM(`TBPM`), 조성/Key(`TKEY`)를 읽고, 제목을 `{BPM} ({Key}) 제목` 형식으로 안전하게 변경합니다.
+
+### 주요 기능
+
+- 폴더 및 하위 폴더의 MP3 파일 스캔
+- 파일 드래그 앤 드롭 지원
+- 이전에 열었던 폴더 기억
+- BPM/Key 태그 기반 제목 미리보기
+- 제목 태그가 없을 때 파일명을 제목 후보로 사용
+- `ffmpeg` + `essentia.js` 기반 BPM/Key 자동 분석
+- 자동 분석 진행률 및 파일별 상태 표시
+- 처리 가능/누락/완료/오류 필터
+- ID3 제목 태그만 수정하고 파일명은 변경하지 않음
+- Windows 설치 프로그램 생성 지원
+
+### 설치 파일 만들기
+
+```powershell
+npm.cmd install
+npm.cmd test
+npm.cmd run dist
+```
+
+빌드 결과는 `dist` 폴더에 생성됩니다.
+
+- 설치 프로그램: `dist/Music Tag Renamer Setup 0.1.0.exe`
+- 설치 없이 실행: `dist/win-unpacked/Music Tag Renamer.exe`
+
+### 개발 실행
+
+```powershell
+npm.cmd install
+npm.cmd start
+```
+
+### 라이선스 주의
+
+자동 분석 기능은 `ffmpeg-static`과 `essentia.js`를 사용합니다.
+
+- `essentia.js`: AGPL-3.0
+- `ffmpeg-static`: GPL-3.0-or-later
+
+개인용 로컬 도구로 사용하는 것은 괜찮지만, 배포 전에는 포함 라이선스 고지를 확인해야 합니다.
+
+---
+
+## English
+
+A Windows Electron app for organizing DJ music libraries. It reads MP3 ID3 title (`TIT2`), BPM (`TBPM`), and key (`TKEY`) tags, then safely updates the title tag to the `{BPM} ({Key}) Title` format.
+
+### Features
+
+- Scan MP3 files in a folder and its subfolders
+- Folder drag-and-drop support
+- Remember the last opened folder
+- Preview title changes based on BPM/Key tags
+- Use the file name as a title candidate when the title tag is missing
+- Automatic BPM/Key analysis powered by `ffmpeg` and `essentia.js`
+- Real-time analysis progress and per-file status
+- Filters for ready/missing/done/error states
+- Updates only the ID3 title tag and never renames the actual file
+- Windows installer build support
+
+### Build Installer
+
+```powershell
+npm.cmd install
+npm.cmd test
+npm.cmd run dist
+```
+
+Build outputs are generated in the `dist` folder.
+
+- Installer: `dist/Music Tag Renamer Setup 0.1.0.exe`
+- Portable unpacked app: `dist/win-unpacked/Music Tag Renamer.exe`
+
+### Development
+
+```powershell
+npm.cmd install
+npm.cmd start
+```
+
+### License Notice
+
+The automatic analysis feature uses `ffmpeg-static` and `essentia.js`.
+
+- `essentia.js`: AGPL-3.0
+- `ffmpeg-static`: GPL-3.0-or-later
+
+This is fine for personal local use, but redistribution should include proper license notices.

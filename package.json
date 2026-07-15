@@ -1,0 +1,59 @@
+{
+  "name": "music-tag-renamer-electron",
+  "version": "0.1.0",
+  "description": "DJ용 MP3 ID3 제목 일괄 정리 도구",
+  "author": "legna",
+  "main": "src/main/main.js",
+  "type": "commonjs",
+  "scripts": {
+    "start": "electron .",
+    "test": "node --test test/**/*.test.js",
+    "pack": "electron-builder --dir",
+    "dist": "electron-builder --win nsis"
+  },
+  "build": {
+    "appId": "com.music-tag-renamer.app",
+    "productName": "Music Tag Renamer",
+    "asar": true,
+    "asarUnpack": [
+      "node_modules/ffmpeg-static/ffmpeg.exe",
+      "node_modules/essentia.js/dist/*.wasm"
+    ],
+    "files": [
+      "src/**/*",
+      "package.json",
+      "node_modules/**/*"
+    ],
+    "directories": {
+      "output": "dist"
+    },
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
+      ]
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "runAfterFinish": true,
+      "shortcutName": "Music Tag Renamer"
+    }
+  },
+  "dependencies": {
+    "essentia.js": "^0.1.3",
+    "ffmpeg-static": "^5.3.0",
+    "music-metadata": "^10.9.0",
+    "node-id3": "^0.2.9"
+  },
+  "devDependencies": {
+    "electron": "^37.0.0",
+    "electron-builder": "^26.0.0"
+  }
+}

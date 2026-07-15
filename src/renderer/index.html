@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Music Tag Renamer</title>
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <header class="app-bar">
+    <div class="folder-meta">
+      <span class="eyebrow">DJ LIBRARY TOOL</span>
+      <span id="folder-path">폴더가 선택되지 않았습니다.</span>
+    </div>
+    <div class="app-actions">
+      <span class="format-note">형식: <code>{BPM} ({Key}) 제목</code></span>
+      <button id="apply" class="primary" disabled>선택 0항목 변경</button>
+    </div>
+  </header>
+
+  <main>
+    <section id="drop-zone" class="drop-zone">
+      MP3 폴더를 이곳에 드래그 앤 드롭하세요
+      <span>폴더를 불러온 뒤에는 이 영역이 숨겨집니다.</span>
+    </section>
+
+    <section id="progress-panel" class="progress-panel hidden">
+      <div class="progress-head">
+        <h2>자동 분석 진행상황</h2>
+        <span id="progress-count">0 / 0</span>
+      </div>
+      <div class="progress-track"><div id="progress-fill" class="progress-fill"></div></div>
+      <p id="progress-current" class="muted">대기 중입니다.</p>
+    </section>
+
+    <section class="workbar">
+      <div id="filters" class="filters" aria-label="상태 필터">
+        <button class="filter-chip active" data-filter="all">전체 <b id="total">0</b></button>
+        <button class="filter-chip" data-filter="ready">처리 가능 <b id="ready">0</b></button>
+        <button class="filter-chip" data-filter="missing">태그 누락 <b id="missing">0</b></button>
+        <button class="filter-chip" data-filter="done">이미 처리 <b id="done">0</b></button>
+        <button class="filter-chip" data-filter="error">오류 <b id="errors">0</b></button>
+      </div>
+      <div class="workbar-actions">
+        <button id="refresh">새로고침</button>
+        <button id="choose-folder">폴더 열기</button>
+        <button id="analyze-missing">누락 태그 자동 분석</button>
+      </div>
+    </section>
+
+    <section class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th class="check-col"><input id="toggle-visible-selection" type="checkbox" title="현재 필터 항목 선택/해제"></th>
+            <th>파일명</th>
+            <th>현재 제목</th>
+            <th>BPM</th>
+            <th>Key</th>
+            <th>변경 후 제목</th>
+            <th>상태</th>
+            <th>진행/경고</th>
+          </tr>
+        </thead>
+        <tbody id="track-list">
+          <tr><td colspan="8" class="empty">폴더를 열어 MP3 파일을 불러오세요.</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section class="result">
+      <h2>처리 결과</h2>
+      <pre id="result-text">아직 실행한 작업이 없습니다.</pre>
+    </section>
+  </main>
+
+  <div id="intro-modal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="intro-title">
+    <div class="modal-card">
+      <h2 id="intro-title">Music Tag Renamer</h2>
+      <p class="modal-summary">MP3의 BPM·Key 태그를 기준으로 ID3 제목을 안전하게 정리합니다.</p>
+      <p class="muted">파일명은 바꾸지 않고, 제목 태그만 <code>{BPM} ({Key}) 제목</code> 형식으로 변경합니다. 제목 태그가 없으면 파일명을 제목으로 사용합니다.</p>
+      <div class="modal-actions">
+        <label class="check-line">
+          <input id="hide-intro-next-time" type="checkbox">
+          다음부터 표시 안 함
+        </label>
+        <button id="close-intro" class="primary">닫기</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="confirm-modal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="confirm-title">
+    <div class="modal-card">
+      <h2 id="confirm-title">자동 분석을 시작할까요?</h2>
+      <p id="confirm-summary" class="modal-summary"></p>
+      <dl class="estimate-grid">
+        <div><dt>대상 파일</dt><dd id="estimate-files">0개</dd></div>
+        <div><dt>예상 시간</dt><dd id="estimate-time">0초</dd></div>
+      </dl>
+      <p class="muted">분석 결과는 각 파일의 ID3 <code>TBPM</code> / <code>TKEY</code> 태그에 저장됩니다. 원본 오디오는 변경하지 않습니다.</p>
+      <div class="modal-actions">
+        <button id="cancel-analysis">취소</button>
+        <button id="confirm-analysis" class="primary">분석 시작</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="./renderer.js"></script>
+</body>
+</html>
