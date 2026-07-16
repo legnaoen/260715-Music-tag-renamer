@@ -9,15 +9,15 @@
     "start": "electron .",
     "test": "node --test test/**/*.test.js",
     "pack": "electron-builder --dir",
-    "dist": "electron-builder --win nsis"
+    "dist": "electron-builder --win nsis",
+    "dist:mac": "electron-builder --mac dmg"
   },
   "build": {
     "appId": "com.music-tag-renamer.app",
     "productName": "Music Tag Renamer",
-    "icon": "assets/icon.ico",
     "asar": true,
     "asarUnpack": [
-      "node_modules/ffmpeg-static/ffmpeg.exe",
+      "node_modules/ffmpeg-static/*",
       "node_modules/essentia.js/dist/*.wasm"
     ],
     "files": [
@@ -30,6 +30,7 @@
       "output": "dist"
     },
     "win": {
+      "icon": "assets/icon.ico",
       "target": [
         {
           "target": "nsis",
@@ -37,6 +38,13 @@
             "x64"
           ]
         }
+      ]
+    },
+    "mac": {
+      "icon": "assets/icon.png",
+      "category": "public.app-category.music",
+      "target": [
+        "dmg"
       ]
     },
     "nsis": {

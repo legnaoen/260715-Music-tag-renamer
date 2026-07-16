@@ -1,5 +1,5 @@
 const { spawn } = require('node:child_process');
-const ffmpegPath = require('ffmpeg-static');
+const ffmpegPath = require('ffmpeg-static').replace('app.asar', 'app.asar.unpacked');
 const { Essentia, EssentiaWASM } = require('essentia.js');
 
 const SAMPLE_RATE = 44100;
