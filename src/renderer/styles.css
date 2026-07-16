@@ -76,14 +76,6 @@ main { padding: 16px 32px 28px; }
 .drop-zone.dragging { border-color: #65d6b2; background: #1a302f; }
 .drop-zone.loading { opacity: .6; }
 
-.progress-panel {
-  margin-bottom: 12px;
-  background: #171f2a;
-  border: 1px solid #273241;
-  border-radius: 8px;
-  padding: 12px;
-}
-
 .progress-head {
   display: flex;
   align-items: center;
@@ -111,7 +103,68 @@ main { padding: 16px 32px 28px; }
   transition: width .2s ease;
 }
 
-.progress-panel p { margin: 0; font-size: 12px; }
+.progress-modal-card {
+  width: min(680px, 100%);
+}
+
+.progress-modal-card .progress-track {
+  margin: 14px 0;
+}
+
+.progress-modal-card p {
+  margin: 0;
+  font-size: 12px;
+}
+
+.analysis-result-summary {
+  margin-top: 14px;
+  padding: 12px;
+  border: 1px solid #273241;
+  border-radius: 8px;
+  background: #101823;
+}
+
+.analysis-result-summary.has-failure {
+  border-color: #6f453f;
+  background: #211816;
+}
+
+.analysis-result-summary h3 {
+  margin: 0 0 8px;
+  font-size: 14px;
+}
+
+.analysis-result-summary p {
+  margin: 0 0 8px;
+  color: #d8e1ee;
+}
+
+.analysis-result-summary p:last-child {
+  margin-bottom: 0;
+}
+
+.analysis-result-summary ul {
+  max-height: 160px;
+  overflow: auto;
+  margin: 10px 0;
+  padding-left: 18px;
+}
+
+.analysis-result-summary li {
+  margin: 8px 0;
+}
+
+.analysis-result-summary li b,
+.analysis-result-summary li span {
+  display: block;
+}
+
+.analysis-result-summary li span {
+  margin-top: 3px;
+  color: #ffb7a8;
+  font-size: 12px;
+  word-break: break-word;
+}
 
 .workbar {
   min-height: 42px;
@@ -321,6 +374,10 @@ pre {
   justify-content: space-between;
   gap: 8px;
   margin-top: 18px;
+}
+
+.analysis-modal-actions {
+  align-items: center;
 }
 
 @media(max-width: 900px) {

@@ -3,6 +3,7 @@ let tracks = [];
 let isBusy = false;
 let activeFilter = 'all';
 let analysisProgress = null;
+let analysisResult = null;
 let analysisStatusByPath = new Map();
 let pendingAnalysisResolve = null;
 const SECONDS_PER_FILE_ESTIMATE = 6;
@@ -66,18 +67,57 @@ function setBusy(value, message) {
 }
 
 function renderProgress() {
-  const panel = $('progress-panel');
+  const modal = $('analysis-progress-modal');
   if (!analysisProgress) {
-    panel.classList.add('hidden');
+    modal.classList.add('hidden');
+    $('analysis-result-summary').classList.add('hidden');
+    $('analysis-result-summary').innerHTML = '';
     return;
   }
   const total = analysisProgress.total || 0;
   const completed = analysisProgress.completed || 0;
   const percent = total ? Math.round((completed / total) * 100) : 0;
-  panel.classList.remove('hidden');
+  const isDone = Boolean(analysisProgress.done);
+  modal.classList.remove('hidden');
   $('progress-count').textContent = `${completed} / ${total} (${percent}%)`;
   $('progress-fill').style.width = `${percent}%`;
   $('progress-current').textContent = analysisProgress.current || '대기 중입니다.';
+  $('close-analysis-progress').disabled = !isDone;
+  $('analysis-modal-hint').textContent = isDone ? '분석 결과를 확인한 뒤 닫을 수 있습니다.' : '분석 중에는 창을 닫을 수 없습니다.';
+  renderAnalysisResultSummary();
+}
+
+function renderAnalysisResultSummary() {
+  const target = $('analysis-result-summary');
+  if (!analysisResult) {
+    target.classList.add('hidden');
+    target.innerHTML = '';
+    return;
+  }
+
+  const entries = analysisResult.entries || [];
+  const byStatus = (status) => entries.filter((entry) => entry.status === status);
+  const successCount = byStatus('success').length;
+  const skipped = byStatus('skipped');
+  const errors = byStatus('error');
+  const failed = [...errors, ...skipped];
+  const logPath = analysisResult.logPath || '';
+
+  const detail = failed.slice(0, 5).map((entry) => {
+    const fileName = entry.path ? entry.path.split(/[\\/]/).pop() : '알 수 없는 파일';
+    const reason = entry.error || entry.reason || '원인 정보가 없습니다.';
+    return `<li><b>${escapeHtml(fileName)}</b><span>${escapeHtml(reason)}</span></li>`;
+  }).join('');
+  const more = failed.length > 5 ? `<p class="muted">외 ${failed.length - 5}건은 로그 파일에서 확인할 수 있습니다.</p>` : '';
+
+  target.classList.toggle('has-failure', failed.length > 0);
+  target.classList.remove('hidden');
+  target.innerHTML = `
+    <h3>${failed.length ? '분석 결과: 일부 실패' : '분석 완료'}</h3>
+    <p>성공 ${successCount}건 / 건너뜀 ${skipped.length}건 / 오류 ${errors.length}건</p>
+    ${failed.length ? `<ul>${detail}</ul>${more}` : ''}
+    ${logPath ? `<p class="muted">로그: ${escapeHtml(logPath)}</p>` : ''}
+  `;
 }
 
 function renderHeaderCheckbox() {
@@ -134,6 +174,7 @@ async function refreshTracksAfterChange(message) {
   if (message) $('result-text').textContent = message;
   tracks = (await window.musicRenamer.scanFolder(folderPath)).map((track) => ({ ...track, selected: false }));
   analysisProgress = null;
+  analysisResult = null;
   analysisStatusByPath = new Map();
   render();
 }
@@ -142,6 +183,7 @@ async function load(folder) {
   if (!folder || isBusy) return;
   folderPath = folder;
   analysisProgress = null;
+  analysisResult = null;
   analysisStatusByPath = new Map();
   setBusy(true, '폴더를 읽는 중입니다...');
   try {
@@ -195,13 +237,15 @@ function closeIntroModal() {
 function handleAnalyzeProgress(progress) {
   if (!progress) return;
   if (progress.type === 'start') {
-    analysisProgress = { total: progress.total, completed: progress.completed, current: '분석을 시작합니다.' };
+    analysisResult = null;
+    analysisProgress = { total: progress.total, completed: progress.completed, current: '분석을 시작합니다.', done: false };
   }
   if (progress.type === 'file-start') {
     analysisProgress = {
       total: progress.total,
       completed: progress.completed,
-      current: `분석 중: ${progress.fileName}`
+      current: `분석 중: ${progress.fileName}`,
+      done: false
     };
     analysisStatusByPath.set(progress.path, { state: 'running' });
   }
@@ -210,7 +254,8 @@ function handleAnalyzeProgress(progress) {
     analysisProgress = {
       total: progress.total,
       completed: progress.completed,
-      current: `완료: ${progress.fileName}`
+      current: `완료: ${progress.fileName}`,
+      done: false
     };
     analysisStatusByPath.set(progress.path, {
       state: entry.status,
@@ -224,9 +269,17 @@ function handleAnalyzeProgress(progress) {
     analysisProgress = {
       total: progress.total,
       completed: progress.completed,
-      current: `분석 완료. 로그: ${progress.logPath}`
+      current: `분석 완료. 결과를 정리하는 중입니다...`,
+      done: false
     };
   }
+  render();
+}
+
+function closeAnalysisProgressModal() {
+  if (!analysisProgress?.done) return;
+  analysisProgress = null;
+  analysisResult = null;
   render();
 }
 
@@ -267,8 +320,10 @@ $('confirm-analysis').addEventListener('click', () => closeConfirmModal(true));
 $('confirm-modal').addEventListener('click', (event) => {
   if (event.target.id === 'confirm-modal') closeConfirmModal(false);
 });
+$('close-analysis-progress').addEventListener('click', closeAnalysisProgressModal);
 document.addEventListener('keydown', (event) => {
   if (event.key === 'Escape' && !$('confirm-modal').classList.contains('hidden')) closeConfirmModal(false);
+  if (event.key === 'Escape' && !$('analysis-progress-modal').classList.contains('hidden')) closeAnalysisProgressModal();
 });
 
 $('analyze-missing').addEventListener('click', async () => {
@@ -278,13 +333,30 @@ $('analyze-missing').addEventListener('click', async () => {
   if (!confirmed) return;
 
   prepareAnalysisState();
-  analysisProgress = { total: targetCount, completed: 0, current: '분석 준비 중입니다.' };
+  analysisResult = null;
+  analysisProgress = { total: targetCount, completed: 0, current: '분석 준비 중입니다.', done: false };
   setBusy(true, `누락 태그 ${targetCount}개 파일을 자동 분석하는 중입니다. 예상 시간은 ${formatDuration(targetCount * SECONDS_PER_FILE_ESTIMATE)}입니다...`);
   try {
     const result = await window.musicRenamer.analyzeMissingTags(folderPath);
+    analysisResult = result;
     const count = (status) => result.entries.filter((entry) => entry.status === status).length;
     tracks = result.tracks.map((track) => ({ ...track, selected: false }));
+    analysisProgress = {
+      total: targetCount,
+      completed: targetCount,
+      current: `분석 완료. 성공 ${count('success')}건 / 건너뜀 ${count('skipped')}건 / 오류 ${count('error')}건`,
+      done: true
+    };
     $('result-text').textContent = `분석 성공 ${count('success')}건 / 건너뜀 ${count('skipped')}건 / 오류 ${count('error')}건\n로그: ${result.logPath}`;
+  } catch (error) {
+    analysisResult = { entries: [{ status: 'error', error: error.message }], logPath: '' };
+    analysisProgress = {
+      total: targetCount,
+      completed: analysisProgress?.completed || 0,
+      current: `분석 실패: ${error.message}`,
+      done: true
+    };
+    $('result-text').textContent = `분석 실패\n${error.message}`;
   } finally {
     setBusy(false);
   }
