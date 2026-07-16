@@ -1,6 +1,6 @@
 {
   "name": "music-tag-renamer-electron",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "DJ용 MP3 ID3 제목 일괄 정리 도구",
   "author": "legna",
   "main": "src/main/main.js",
