@@ -37,6 +37,12 @@ npm.cmd install
 npm.cmd start
 ```
 
+### 앱 아이콘 변경
+
+앱 아이콘은 `assets/icon.ico`를 사용합니다. 원본 PNG는 `assets/icon.png`에 보관되어 있습니다.
+
+아이콘을 바꾸려면 새 PNG를 만든 뒤 Windows용 `.ico`로 변환하고, `package.json`의 `build.icon` 값이 `assets/icon.ico`를 가리키는지 확인한 다음 `npm.cmd run dist`로 다시 빌드하면 됩니다.
+
 ### 라이선스 주의
 
 자동 분석 기능은 `ffmpeg-static`과 `essentia.js`를 사용합니다.
@@ -84,6 +90,12 @@ Build outputs are generated in the `dist` folder.
 npm.cmd install
 npm.cmd start
 ```
+
+### App Icon
+
+The app icon is stored at `assets/icon.ico`. The source PNG is kept at `assets/icon.png`.
+
+To replace the icon, create a new PNG, convert it to a Windows `.ico` file, confirm that `package.json` `build.icon` points to `assets/icon.ico`, then rebuild with `npm.cmd run dist`.
 
 ### License Notice
 
